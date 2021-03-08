@@ -3,8 +3,7 @@
 #include <string>
 #include <vector>
 
-TextEditor* createTextEditor(Undo* un)
-{
+TextEditor* createTextEditor(Undo* un) {
 	return new StudentTextEditor(un);
 }
 
@@ -13,8 +12,7 @@ StudentTextEditor::StudentTextEditor(Undo* undo)
 	// TODO
 }
 
-StudentTextEditor::~StudentTextEditor()
-{
+StudentTextEditor::~StudentTextEditor() {
 	// TODO
 }
 

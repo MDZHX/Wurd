@@ -2,8 +2,7 @@
 #include <string>
 #include <vector>
 
-SpellCheck* createSpellCheck()
-{
+SpellCheck* createSpellCheck() {
 	return new StudentSpellCheck;
 }
 
