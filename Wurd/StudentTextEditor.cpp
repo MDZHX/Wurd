@@ -75,11 +75,32 @@ void StudentTextEditor::move(Dir dir) {
 }
 
 void StudentTextEditor::del() {
-	// TODO
+	// TODO: finish this
+    // TODO: UNDO
+    // TODO: edge case bug: delete at the end
+    if (m_col == m_line->length() && m_row < m_lines.size() - 1)  {
+        join();
+        getUndo()->submit(Undo::Action::JOIN, m_row, m_col);
+    }
+    else if (m_col < m_line->length()) { // it's always guaranteed that m_row < m_lines.size()
+        getUndo()->submit(Undo::Action::DELETE, m_row, m_col, m_line->at(m_col)); // since position doesn't change, can sumbit before deletion
+        m_line->erase(m_col, 1);
+    }
 }
 
 void StudentTextEditor::backspace() {
-	// TODO
+	// TODO: finish this
+    // TODO: UNDO
+    if (m_col == 0 && m_row > 0) {
+        moveTo(m_row - 1);
+        join();
+        getUndo()->submit(Undo::Action::JOIN, m_row, m_col);
+    }
+    else if (m_col > 0) { // it's always guaranteed that m_row < m_lines.size()
+        m_col--;
+        getUndo()->submit(Undo::Action::DELETE, m_row, m_col, m_line->at(m_col)); // position after deletion
+        m_line->erase(m_col, 1);
+    }
 }
 
 void StudentTextEditor::insert(char ch) {
@@ -98,12 +119,9 @@ void StudentTextEditor::insert(char ch) {
 void StudentTextEditor::enter() {
     // TODO: check out of bound?
     getUndo()->submit(Undo::Action::SPLIT, m_row, m_col);
-    std::string firstHalf = m_line->substr(0, m_col);
-    m_line->erase(0, m_col);
+    split();
+    moveTo(m_row + 1, 0);
     
-    m_lines.insert(m_line, firstHalf);
-    m_row++;
-    m_col = 0;
 }
 
 void StudentTextEditor::getPos(int& row, int& col) const {
@@ -135,20 +153,21 @@ void StudentTextEditor::undo() {
     int r, c, cnt;
     std::string txt;
     Undo::Action act = getUndo()->get(r, c, cnt, txt);
-    if (act == Undo::Action::DELETE) {
-        m_line = getLine(r);
-        m_row = r;
-        m_col = c - cnt;
+    if (act == Undo::Action::DELETE) { // TODO: change the implementation of r and c
+        moveTo(r, c - cnt);
         m_line->erase(c-cnt, cnt);
     }
+    else if (act == Undo::Action::INSERT) {
+        moveTo(r, c);
+        m_line->insert(m_col, txt);
+    }
     else if (act == Undo::Action::JOIN) {
-        m_line = getLine(r);
-        m_row = r;
-        m_col = c;
-        std::list<std::string>::iterator nextLine = m_line;
-        nextLine++;
-        m_line->append(*nextLine);
-        m_lines.erase(nextLine);
+        moveTo(r, c);
+        join();
+    }
+    else if (act == Undo::Action::SPLIT) { // TODO: check for other cases of split
+        moveTo(r, c);
+        split(); // TODO: wrong curser position?
     }
 }
 
@@ -174,4 +193,33 @@ std::list<std::string>::iterator StudentTextEditor::getLine(int row) const {
     }
     
     return line;
+}
+
+// Move to row r column c
+void StudentTextEditor::moveTo(int r, int c) {
+    m_line = getLine(r);
+    m_row = r;
+    m_col = c;
+}
+
+// Move to the end of the row r
+void StudentTextEditor::moveTo(int r) {
+    m_line = getLine(r);
+    m_row = r;
+    m_col = m_line->length();
+}
+
+void StudentTextEditor::join() {
+    std::list<std::string>::iterator nextLine = m_line;
+    nextLine++;
+    m_line->append(*nextLine);
+    m_lines.erase(nextLine);
+}
+
+void StudentTextEditor::split() {
+    std::string firstHalf = m_line->substr(0, m_col);
+    m_line->erase(0, m_col);
+    
+    m_lines.insert(m_line, firstHalf);
+    m_line--;
 }

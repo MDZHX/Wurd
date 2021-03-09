@@ -25,16 +25,14 @@ void StudentUndo::submit(const Action action, int row, int col, char ch) {
     else if (!m_ops.empty() &&
              m_ops.top()->action == Action::DELETE && action == Action::DELETE &&
              m_ops.top()->row == row && m_ops.top()->col - 1 == col) {
-        m_ops.top()->text += ch;
+        m_ops.top()->text = ch + m_ops.top()->text;
         m_ops.top()->col--;
-        // TODO: Might be buggy
     }
     else if (!m_ops.empty() &&
              m_ops.top()->action == Action::INSERT && action == Action::INSERT &&
              m_ops.top()->row == row && m_ops.top()->col + 1 == col) {
         m_ops.top()->text += ch;
         m_ops.top()->col++;
-        // TODO: Might be buggy - checked some
     }
     else {
         Operation* newOp = new Operation(action, row, col, ch);

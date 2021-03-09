@@ -32,6 +32,10 @@ private:
     int m_col;
     
     std::list<std::string>::iterator getLine(int row) const;
+    void moveTo(int r, int c);
+    void moveTo(int r);
+    void join();
+    void split();
 };
 
 #endif // STUDENTTEXTEDITOR_H_
