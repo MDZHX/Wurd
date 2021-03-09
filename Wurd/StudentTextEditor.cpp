@@ -97,6 +97,7 @@ void StudentTextEditor::insert(char ch) {
 
 void StudentTextEditor::enter() {
     // TODO: check out of bound?
+    getUndo()->submit(Undo::Action::SPLIT, m_row, m_col);
     std::string firstHalf = m_line->substr(0, m_col);
     m_line->erase(0, m_col);
     
@@ -135,11 +136,19 @@ void StudentTextEditor::undo() {
     std::string txt;
     Undo::Action act = getUndo()->get(r, c, cnt, txt);
     if (act == Undo::Action::DELETE) {
-        // TODO: change row
         m_line = getLine(r);
         m_row = r;
         m_col = c - cnt;
         m_line->erase(c-cnt, cnt);
+    }
+    else if (act == Undo::Action::JOIN) {
+        m_line = getLine(r);
+        m_row = r;
+        m_col = c;
+        std::list<std::string>::iterator nextLine = m_line;
+        nextLine++;
+        m_line->append(*nextLine);
+        m_lines.erase(nextLine);
     }
 }
 
