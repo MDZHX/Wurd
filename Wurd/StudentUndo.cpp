@@ -1,5 +1,7 @@
 #include "StudentUndo.h"
 
+#include <iostream>
+
 Undo* createUndo() {
 	return new StudentUndo;
 }
@@ -31,7 +33,8 @@ void StudentUndo::submit(const Action action, int row, int col, char ch) {
              m_ops.top()->action == Action::INSERT && action == Action::INSERT &&
              m_ops.top()->row == row && m_ops.top()->col + 1 == col) {
         m_ops.top()->text += ch;
-        // TODO: Might be buggy
+        m_ops.top()->col++;
+        // TODO: Might be buggy - checked some
     }
     else {
         Operation* newOp = new Operation(action, row, col, ch);
@@ -47,7 +50,7 @@ StudentUndo::Action StudentUndo::get(int& row, int& col, int& count, std::string
     std::string txt;
     Action ret;
     if (prev->action == Action::INSERT) {
-        count = prev->text.length();
+        cnt = prev->text.length();
         ret = Action::DELETE;
     }
     else if (prev->action == Action::DELETE) {

@@ -96,7 +96,13 @@ void StudentTextEditor::insert(char ch) {
 }
 
 void StudentTextEditor::enter() {
-	// TODO
+    // TODO: check out of bound?
+    std::string firstHalf = m_line->substr(0, m_col);
+    m_line->erase(0, m_col);
+    
+    m_lines.insert(m_line, firstHalf);
+    m_row++;
+    m_col = 0;
 }
 
 void StudentTextEditor::getPos(int& row, int& col) const {
@@ -105,34 +111,58 @@ void StudentTextEditor::getPos(int& row, int& col) const {
 }
 
 int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::string>& lines) const {
+    // TODO: check complexity and debug
     if (startRow < 0 || numRows < 0 || startRow > m_lines.size()) return -1;
     
     lines.clear();
     
-    std::list<std::string>::iterator it = m_line;
-    int l = m_row;
-    if (startRow >= m_row) {
-        while (l != startRow) {
-            l++;
-            it++;
-        }
-    }
-    else {
-        while (l != startRow) {
-            l--;
-            it--;
-        }
-    }
+    std::list<std::string>::iterator it = getLine(startRow);
     
-    int i;
-    for (i = 0; i < numRows; i++) {
-        if (it == m_lines.end()) break;
+    int count = 0;
+    while (count < numRows && it != m_lines.end())
+    {
         lines.push_back(*it);
         it++;
+        count++;
     }
-	return i;
+	return count;
 }
 
 void StudentTextEditor::undo() {
-	// TODO
+	// TODO: implement the rest
+    // TODO: check return value of get()
+    int r, c, cnt;
+    std::string txt;
+    Undo::Action act = getUndo()->get(r, c, cnt, txt);
+    if (act == Undo::Action::DELETE) {
+        // TODO: change row
+        m_line = getLine(r);
+        m_row = r;
+        m_col = c - cnt;
+        m_line->erase(c-cnt, cnt);
+    }
+}
+
+//
+// Private Member Functions
+//
+
+std::list<std::string>::iterator StudentTextEditor::getLine(int row) const {
+    std::list<std::string>::iterator line = m_line;
+    int i = m_row;
+    
+    if (row >= m_row) {
+        while (i != row) {
+            i++;
+            line++;
+        }
+    }
+    else {
+        while (i != row) {
+            i--;
+            line--;
+        }
+    }
+    
+    return line;
 }

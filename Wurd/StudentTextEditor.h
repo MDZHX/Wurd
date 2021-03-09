@@ -27,9 +27,11 @@ public:
 
 private:
     std::list<std::string> m_lines;
+    std::list<std::string>::iterator m_line;
     int m_row;
     int m_col;
-    std::list<std::string>::iterator m_line;
+    
+    std::list<std::string>::iterator getLine(int row) const;
 };
 
 #endif // STUDENTTEXTEDITOR_H_
