@@ -1,7 +1,10 @@
 #include "StudentTextEditor.h"
 #include "Undo.h"
+
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 TextEditor* createTextEditor(Undo* un) {
 	return new StudentTextEditor(un);
@@ -9,7 +12,6 @@ TextEditor* createTextEditor(Undo* un) {
 
 StudentTextEditor::StudentTextEditor(Undo* undo)
  : TextEditor(undo), m_row(0), m_col(0) {
-	// TODO: Might change
      m_lines.push_back("");
      m_line = m_lines.begin();
 }
@@ -19,7 +21,21 @@ StudentTextEditor::~StudentTextEditor() {
 }
 
 bool StudentTextEditor::load(std::string file) {
-	return false;  // TODO
+    std::ifstream infile(file);
+    if (!infile) {
+        return false;
+    }
+    reset();
+    std::string line;
+    while (getline(infile, line)) {
+        if (line.length() != 0 && line.at(line.length()-1) == '\r') {
+            line.pop_back();
+        }
+        m_lines.push_back(line);
+    }
+    m_lines.erase(m_line);
+    m_line = m_lines.begin();
+	return true;
 }
 
 bool StudentTextEditor::save(std::string file) {
@@ -27,11 +43,15 @@ bool StudentTextEditor::save(std::string file) {
 }
 
 void StudentTextEditor::reset() {
-	// TODO
+    m_lines.clear();
+    m_lines.push_back("");
+    m_line = m_lines.begin();
+    m_row = 0;
+    m_col = 0;
+    getUndo()->clear();
 }
 
 void StudentTextEditor::move(Dir dir) {
-    // TODO: check changing col
     if (dir == Dir::UP) {
         if (m_row > 0) {
             m_row--;
@@ -75,9 +95,6 @@ void StudentTextEditor::move(Dir dir) {
 }
 
 void StudentTextEditor::del() {
-	// TODO: finish this
-    // TODO: UNDO
-    // TODO: edge case bug: delete at the end
     if (m_col == m_line->length() && m_row < m_lines.size() - 1)  {
         join();
         getUndo()->submit(Undo::Action::JOIN, m_row, m_col);
@@ -89,8 +106,6 @@ void StudentTextEditor::del() {
 }
 
 void StudentTextEditor::backspace() {
-	// TODO: finish this
-    // TODO: UNDO
     if (m_col == 0 && m_row > 0) {
         moveTo(m_row - 1);
         join();
@@ -117,7 +132,6 @@ void StudentTextEditor::insert(char ch) {
 }
 
 void StudentTextEditor::enter() {
-    // TODO: check out of bound?
     getUndo()->submit(Undo::Action::SPLIT, m_row, m_col);
     split();
     moveTo(m_row + 1, 0);
@@ -130,7 +144,7 @@ void StudentTextEditor::getPos(int& row, int& col) const {
 }
 
 int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::string>& lines) const {
-    // TODO: check complexity and debug
+    // TODO: check complexity (for other things as well) and debug
     if (startRow < 0 || numRows < 0 || startRow > m_lines.size()) return -1;
     
     lines.clear();
@@ -148,12 +162,10 @@ int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::stri
 }
 
 void StudentTextEditor::undo() {
-	// TODO: implement the rest
-    // TODO: check return value of get()
     int r, c, cnt;
     std::string txt;
     Undo::Action act = getUndo()->get(r, c, cnt, txt);
-    if (act == Undo::Action::DELETE) { // TODO: change the implementation of r and c
+    if (act == Undo::Action::DELETE) {
         moveTo(r, c - cnt);
         m_line->erase(c-cnt, cnt);
     }
@@ -165,9 +177,9 @@ void StudentTextEditor::undo() {
         moveTo(r, c);
         join();
     }
-    else if (act == Undo::Action::SPLIT) { // TODO: check for other cases of split
+    else if (act == Undo::Action::SPLIT) {
         moveTo(r, c);
-        split(); // TODO: wrong curser position?
+        split();
     }
 }
 
