@@ -17,7 +17,6 @@ public:
 	void spellCheckLine(const std::string& line, std::vector<Position>& problems);
 
 private:
-    // TODO: move these
     class Trie {
     public:
         Trie();

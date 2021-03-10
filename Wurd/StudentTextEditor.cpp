@@ -39,7 +39,14 @@ bool StudentTextEditor::load(std::string file) {
 }
 
 bool StudentTextEditor::save(std::string file) {
-	return false;  // TODO
+    std::ofstream outfile(file);
+    if (!outfile) {
+        return false;
+    }
+    for (auto i = m_lines.begin(); i != m_lines.end(); i++) {
+        outfile << *i << "\n";
+    }
+	return true;
 }
 
 void StudentTextEditor::reset() {
@@ -149,7 +156,7 @@ int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::stri
     
     lines.clear();
     
-    std::list<std::string>::iterator it = getLine(startRow);
+    auto it = getLine(startRow);
     
     int count = 0;
     while (count < numRows && it != m_lines.end())
@@ -188,7 +195,7 @@ void StudentTextEditor::undo() {
 //
 
 std::list<std::string>::iterator StudentTextEditor::getLine(int row) const {
-    std::list<std::string>::iterator line = m_line;
+    auto line = m_line;
     int i = m_row;
     
     if (row >= m_row) {
@@ -222,7 +229,7 @@ void StudentTextEditor::moveTo(int r) {
 }
 
 void StudentTextEditor::join() {
-    std::list<std::string>::iterator nextLine = m_line;
+    auto nextLine = m_line;
     nextLine++;
     m_line->append(*nextLine);
     m_lines.erase(nextLine);
