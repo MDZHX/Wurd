@@ -17,31 +17,23 @@ public:
 	void spellCheckLine(const std::string& line, std::vector<Position>& problems);
 
 private:
-    class Trie {
-    public:
-        Trie();
-        ~Trie();
-        bool insert(std::string word);
-        bool find(std::string word) const;
-    private:
-        struct TrieNode {
-            TrieNode();
-            TrieNode* children[27];
-            bool isWord;
-        };
-        
-        TrieNode* root;
-        
-        // unsafe to assume ASCII scheme,
-        // char values might not be consecutive i.e. 'b' - 'a' might not be 1
-        // thus use a separate function to map char to int
-        int indexOf(char c) const {
-            return chars.find(c);
-        }
-        void freeTrie(TrieNode* root);
+    struct TrieNode {
+        TrieNode();
+        TrieNode* children[27];
+        bool isWord;
     };
     
-    Trie* m_trie;
+    int indexOf(char c) const;
+    char charOf(int i) const;
+    
+    void createEmptyTrie();
+    void freeTrie(TrieNode* root);
+    
+    bool insert(std::string word);
+    bool find(TrieNode* root, std::string word) const;
+    void search(TrieNode* root, std::string word, int pos, int maxSuggestions, std::vector<std::string>& suggestions);
+    
+    TrieNode* m_root;
 };
 
 #endif  // STUDENTSPELLCHECK_H_
