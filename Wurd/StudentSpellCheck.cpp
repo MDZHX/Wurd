@@ -40,18 +40,47 @@ bool StudentSpellCheck::load(std::string dictionaryFile) {
 }
 
 bool StudentSpellCheck::spellCheck(std::string word, int max_suggestions, std::vector<std::string>& suggestions) {
-    if (word.length() == 0) return true; // TODO: remove this?
+    if (word.length() == 0) return true;
     
-    if (find(m_root, word)) return true;
+    std::string checkWord;
+    
+    for (char c : word) {
+        checkWord += tolower(c);
+    }
+    
+    if (find(m_root, checkWord)) return true;
     
     suggestions.clear();
-    search(m_root, word, 0, max_suggestions, suggestions);
+    search(m_root, checkWord, 0, max_suggestions, suggestions);
     
-	return false; // TODO: check empty word?
+	return false;
 }
 
 void StudentSpellCheck::spellCheckLine(const std::string& line, std::vector<SpellCheck::Position>& problems) {
-	// TODO
+    problems.clear();
+    std::string word;
+    int start = -1;
+    for (int i = 0; i < line.length(); i++) {
+        if (isalpha(line[i]) || line[i] == '\'') {
+            if (word == "") start = i;
+            word += tolower(line[i]);
+        }
+        else if (word != "") {
+            if (!find(m_root, word)) {
+                Position p;
+                p.start = start;
+                p.end = i - 1;
+                problems.push_back(p);
+            }
+            word = "";
+        }
+    }
+    if (word != "" && !find(m_root, word)) {
+        Position p;
+        p.start = start;
+        p.end = line.length() - 1;
+        problems.push_back(p);
+    }
 }
 
 //
@@ -121,7 +150,6 @@ bool StudentSpellCheck::find(TrieNode* root, std::string word) const {
 }
 
 void StudentSpellCheck::search(TrieNode* root, std::string word, int pos, int maxSuggestions, std::vector<std::string>& suggestions) {
-    // TODO: base case
     if (pos == word.length() - 1) {
         for (int i = 0; i < 27; i++) {
             if (suggestions.size() == maxSuggestions) break;
