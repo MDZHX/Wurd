@@ -25,16 +25,20 @@ bool StudentTextEditor::load(std::string file) {
     if (!infile) {
         return false;
     }
-    reset();
+    reset(); // after resetting, there is only one blank line
     std::string line;
     while (getline(infile, line)) {
         if (line.length() != 0 && line.at(line.length()-1) == '\r') {
             line.pop_back();
         }
-        m_lines.push_back(line);
+        if (line.length() != 0) { // don't push if the line is empty after deleting the carriage return
+            m_lines.push_back(line);
+        }
     }
-    m_lines.erase(m_line);
-    m_line = m_lines.begin();
+    if (m_lines.size() > 1) { // if the file opened is not empty, erase the leading blank line
+        m_lines.erase(m_line);
+    }
+    m_line = m_lines.begin(); // set line to the beginning
 	return true;
 }
 
