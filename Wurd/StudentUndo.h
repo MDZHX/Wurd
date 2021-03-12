@@ -4,10 +4,11 @@
 #include "Undo.h"
 
 #include <stack>
+#include <list>
 
 class StudentUndo : public Undo {
 public:
-    StudentUndo();
+    StudentUndo(): Undo() {};
     ~StudentUndo();
 	void submit(Action action, int row, int col, char ch = 0);
 	Action get(int& row, int& col, int& count, std::string& text);
@@ -15,11 +16,11 @@ public:
 
 private:
     struct Operation {
-        Operation(Action act, int r, int c, char ch) : action(act), row(r), col(c), text(1, ch) {}
+        Operation(Action act, int r, int c, char ch) : action(act), row(r), col(c) { text.push_back(ch); }
         Action action;
         int row;
         int col;
-        std::string text;
+        std::list<char> text;
     };
     
     std::stack<Operation*> m_ops;
