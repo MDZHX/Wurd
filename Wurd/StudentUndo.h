@@ -15,6 +15,7 @@ public:
 	void clear();
 
 private:
+    // struct for an operation
     struct Operation {
         Operation(Action act, int r, int c, char ch) : action(act), row(r), col(c) { text.push_back(ch); }
         Action action;
@@ -23,6 +24,7 @@ private:
         std::list<char> text;
     };
     
+    // operation stack
     std::stack<Operation*> m_ops;
 };
 
