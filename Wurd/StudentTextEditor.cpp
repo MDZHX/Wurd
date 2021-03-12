@@ -12,8 +12,7 @@ TextEditor* createTextEditor(Undo* un) {
 
 StudentTextEditor::StudentTextEditor(Undo* undo)
  : TextEditor(undo), m_row(0), m_col(0) {
-     m_lines.push_back("");
-     m_line = m_lines.begin();
+     createEmpty();
 }
 
 StudentTextEditor::~StudentTextEditor() {
@@ -25,18 +24,13 @@ bool StudentTextEditor::load(std::string file) {
     if (!infile) {
         return false;
     }
-    reset(); // after resetting, there is only one blank line
+    reset();
     std::string line;
     while (getline(infile, line)) {
-        if (line.length() != 0 && line.at(line.length()-1) == '\r') {
+        if (!line.empty() && line.at(line.length()-1) == '\r') {
             line.pop_back();
         }
-        if (line.length() != 0) { // don't push if the line is empty after deleting the carriage return
-            m_lines.push_back(line);
-        }
-    }
-    if (m_lines.size() > 1) { // if the file opened is not empty, erase the leading blank line
-        m_lines.erase(m_line);
+        m_lines.push_back(line);
     }
     m_line = m_lines.begin(); // set line to the beginning
 	return true;
@@ -48,14 +42,13 @@ bool StudentTextEditor::save(std::string file) {
         return false;
     }
     for (auto i = m_lines.begin(); i != m_lines.end(); i++) {
-        outfile << *i << "\n";
+        outfile << *i << std::endl;
     }
 	return true;
 }
 
 void StudentTextEditor::reset() {
     m_lines.clear();
-    m_lines.push_back("");
     m_line = m_lines.begin();
     m_row = 0;
     m_col = 0;
@@ -63,6 +56,8 @@ void StudentTextEditor::reset() {
 }
 
 void StudentTextEditor::move(Dir dir) {
+    if (m_lines.size() == 0) return;
+    
     if (dir == Dir::UP) {
         if (m_row > 0) {
             m_row--;
@@ -106,6 +101,8 @@ void StudentTextEditor::move(Dir dir) {
 }
 
 void StudentTextEditor::del() {
+    if (m_lines.size() == 0) return;
+    
     if (m_col == m_line->length() && m_row < m_lines.size() - 1)  {
         join();
         getUndo()->submit(Undo::Action::JOIN, m_row, m_col);
@@ -117,6 +114,8 @@ void StudentTextEditor::del() {
 }
 
 void StudentTextEditor::backspace() {
+    if (m_lines.size() == 0) return;
+    
     if (m_col == 0 && m_row > 0) {
         moveTo(m_row - 1);
         join();
@@ -130,6 +129,10 @@ void StudentTextEditor::backspace() {
 }
 
 void StudentTextEditor::insert(char ch) {
+    if (m_lines.size() == 0) {
+        createEmpty();
+    }
+    
     if (ch == '\t') {
         for (int i = 0; i < 4; i++) {
             m_line->insert(m_col++, 1, ' ');
@@ -143,6 +146,10 @@ void StudentTextEditor::insert(char ch) {
 }
 
 void StudentTextEditor::enter() {
+    if (m_lines.size() == 0) {
+        createEmpty();
+    }
+    
     getUndo()->submit(Undo::Action::SPLIT, m_row, m_col);
     split();
     moveTo(m_row + 1, 0);
@@ -245,4 +252,9 @@ void StudentTextEditor::split() {
     
     m_lines.insert(m_line, firstHalf);
     m_line--;
+}
+
+void StudentTextEditor::createEmpty() {
+    m_lines.push_back("");
+    m_line = m_lines.begin();
 }

@@ -36,6 +36,7 @@ private:
     void moveTo(int r);
     void join();
     void split();
+    void createEmpty();
 };
 
 #endif // STUDENTTEXTEDITOR_H_
